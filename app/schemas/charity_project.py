@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field, PositiveInt
+from pydantic import BaseModel, Extra, Field, PositiveInt
 
 
 class CharityProjectBase(BaseModel):
@@ -11,6 +11,7 @@ class CharityProjectBase(BaseModel):
     full_amount: PositiveInt = 0
 
     class Config:
+        extra = Extra.forbid
         min_anystr_length = 1
 
 class CharityProjectCreate(CharityProjectBase):

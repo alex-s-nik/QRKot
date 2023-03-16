@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_async_session
+from app.models import CharityProject
 from app.core.user import current_superuser, current_user
 from app.crud.charity_project import charity_project_crud
 from app.schemas.charity_project import (
@@ -60,13 +61,22 @@ async def partially_update_project(
     session: AsyncSession = Depends(get_async_session)
 ) -> CharityProjectFromDB:
     """Обновить данные проекта с id project_id. Доступно супрепользователю."""
-    project = await charity_project_crud.get_project_by_id(project_id, session)
+    project: CharityProject = await charity_project_crud.get_project_by_id(project_id, session)
     if not project:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail='Проекта с таким именем нет!'
         )
-    
+    if project_from_req.full_amount < project.full_amount:
+        raise HTTPException(
+            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+            detail="Нельзя сделать сумму пожертвования ниже, чем она была."
+        )
+    if project.fully_invested:
+        raise HTTPException(
+            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+            detail="Нельзя редактировать закрытый проект."
+        )
     project = await charity_project_crud.update(
         project, project_from_req, session
     )
@@ -82,9 +92,14 @@ async def remove_project(
     session: AsyncSession = Depends(get_async_session)
 ) -> CharityProjectFromDB:
     """Удалить проект. Доступно только суперпользователю."""
-    project = charity_project_crud.get_project_by_id(
+    project: CharityProject = charity_project_crud.get_project_by_id(
         project_id, session
     )
+    if project.fully_invested:
+        raise HTTPException(
+            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+            detail="Нельзя удалить закрытый проект."
+        )
     project = await charity_project_crud.delete(
         project, session
     )
