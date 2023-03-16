@@ -7,7 +7,11 @@ from pydantic import BaseModel, Extra, Field, PositiveInt
 class DonationBase(BaseModel):
     """Базовый класс Пожертвования"""
     comment: Optional[str]
-    full_amount: PositiveInt = 0
+    full_amount: PositiveInt
+    
+    class Config:
+        extra = Extra.forbid
+        orm_mode = True
 
 
 class DonationDBBase(DonationBase):
@@ -15,9 +19,6 @@ class DonationDBBase(DonationBase):
     id: int
     create_date: datetime
 
-    class Config:
-        extra = Extra.forbid
-        orm_mode = True
 
 
 class DonationCreate(DonationBase):
@@ -28,8 +29,8 @@ class DonationCreate(DonationBase):
 class DonationDBForSuperUser(DonationDBBase):
     """Представление Пожертвования при запросе из БД для суперпользователя"""
     user_id: int
-    invested_amount: PositiveInt = 0
-    fully_invested: bool = False
+    invested_amount: PositiveInt
+    fully_invested: bool
     close_date: Optional[datetime]
 
 

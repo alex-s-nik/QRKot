@@ -41,7 +41,7 @@ async def create_new_project(
     session: AsyncSession = Depends(get_async_session)
 ) -> CharityProjectFromDB:
     """Создать новый проект. Может только суперпользователь."""
-    project_id_from_db = await charity_project_crud.get_project_id_by_name(project.name)
+    project_id_from_db = await charity_project_crud.get_project_id_by_name(project.name, session)
     if project_id_from_db:
         raise HTTPException(
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY,

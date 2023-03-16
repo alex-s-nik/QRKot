@@ -5,4 +5,4 @@ from app.models.base import BaseModel as Base
 
 class CharityProject(Base):
     name = Column(String, unique=True, nullable=False)
-    comment = Column(String)
+    description = Column(String)

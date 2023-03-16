@@ -7,10 +7,11 @@ from pydantic import BaseModel, Extra, Field, PositiveInt
 class CharityProjectBase(BaseModel):
     """Базовый класс Проекта"""
     name: str = Field(..., max_length=100)
-    decription: str
+    description: str
     full_amount: PositiveInt = 0
 
     class Config:
+        orm_mode = True
         extra = Extra.forbid
         min_anystr_length = 1
 
@@ -27,10 +28,7 @@ class CharityProjectUpdate(CharityProjectBase):
 class CharityProjectFromDB(CharityProjectBase):
     """Представление Проекта при запросе из БД"""
     id: int
-    invested_amount: PositiveInt = 0
+    invested_amount: PositiveInt
     create_date: datetime
-    fully_invested: bool = False
+    fully_invested: bool
     close_date: Optional[datetime]
-
-    class Config(CharityProjectBase.Config):
-        orm_mode = True

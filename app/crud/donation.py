@@ -12,9 +12,11 @@ class CRUDDonation:
     async def create(
             self,
             new_donation: DonationCreate,
-            session: AsyncSession
-    ) -> DonationCreate:
+            session: AsyncSession,
+            user: User
+    ) -> Donation:
         new_donation_data = new_donation.dict()
+        new_donation_data['user_id'] = user.id
 
         db_donation = Donation(**new_donation_data)
 

@@ -27,10 +27,11 @@ router = APIRouter(
 )
 async def create_new_donation(
     donation: DonationCreate,
-    session: AsyncSession = Depends(get_async_session)
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_user)
 ) -> DonationDBForUser:
     """Сделать пожертвование. Доступно любому пользователю."""
-    new_donation = await donation_crud.create(donation, session)
+    new_donation = await donation_crud.create(donation, session, user)
     return new_donation
 
 

@@ -1,8 +1,8 @@
 """First migration
 
-Revision ID: 925b424b78fd
+Revision ID: 3271a28a4188
 Revises: 
-Create Date: 2023-03-16 12:13:36.008700
+Create Date: 2023-03-16 22:41:01.228643
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '925b424b78fd'
+revision = '3271a28a4188'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -26,7 +26,7 @@ def upgrade():
     sa.Column('create_date', sa.DateTime(), nullable=False),
     sa.Column('close_date', sa.DateTime(), nullable=True),
     sa.Column('name', sa.String(), nullable=False),
-    sa.Column('comment', sa.String(), nullable=True),
+    sa.Column('description', sa.String(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
@@ -47,7 +47,7 @@ def upgrade():
     sa.Column('fully_invested', sa.Boolean(), nullable=False),
     sa.Column('create_date', sa.DateTime(), nullable=False),
     sa.Column('close_date', sa.DateTime(), nullable=True),
-    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('comment', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
