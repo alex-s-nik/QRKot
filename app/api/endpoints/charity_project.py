@@ -25,6 +25,7 @@ router = APIRouter(
 async def get_all_projects(
     session: AsyncSession = Depends(get_async_session)
 ) -> list[CharityProjectFromDB]:
+    """Получить список всех проектов. Доступно всем посетителям сайта."""
     all_projects = await charity_project_crud.get_all(session)
     return all_projects
 
@@ -38,6 +39,7 @@ async def create_new_project(
     project: CharityProjectCreate,
     session: AsyncSession = Depends(get_async_session)
 ) -> CharityProjectFromDB:
+    """Создать новый проект. Может только суперпользователь."""
     project_id_from_db = await charity_project_crud.get_project_id_by_name(project.name)
     if project_id_from_db:
         raise HTTPException(
@@ -57,6 +59,7 @@ async def partially_update_project(
     project_from_req: CharityProjectUpdate,
     session: AsyncSession = Depends(get_async_session)
 ) -> CharityProjectFromDB:
+    """Обновить данные проекта с id project_id. Доступно супрепользователю."""
     project = await charity_project_crud.get_project_by_id(project_id, session)
     if not project:
         raise HTTPException(
@@ -78,6 +81,7 @@ async def remove_project(
     project_id: int,
     session: AsyncSession = Depends(get_async_session)
 ) -> CharityProjectFromDB:
+    """Удалить проект. Доступно только суперпользователю."""
     project = charity_project_crud.get_project_by_id(
         project_id, session
     )

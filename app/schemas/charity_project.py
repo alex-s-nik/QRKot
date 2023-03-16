@@ -1,15 +1,17 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, PositiveInt
+from pydantic import BaseModel, Field, PositiveInt
 
 
 class CharityProjectBase(BaseModel):
     """Базовый класс Проекта"""
-    name: str
+    name: str = Field(..., max_length=100)
     decription: str
     full_amount: PositiveInt = 0
 
+    class Config:
+        min_anystr_length = 1
 
 class CharityProjectCreate(CharityProjectBase):
     """Создание Проекта"""
@@ -29,5 +31,5 @@ class CharityProjectFromDB(CharityProjectBase):
     fully_invested: bool = False
     close_date: Optional[datetime]
 
-    class Config:
+    class Config(CharityProjectBase.Config):
         orm_mode = True

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import Boolean, Column, DateTime, Integer
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, declared_attr, sessionmaker
@@ -14,7 +16,7 @@ class PreBase:
     full_amount = Column(Integer, nullable=False)
     invested_amount = Column(Integer, nullable=False)
     fully_invested = Column(Boolean, nullable=False)
-    create_date = Column(DateTime, nullable=False)
+    create_date = Column(DateTime, nullable=False, default=datetime.now)
     close_date = Column(DateTime)
     
 

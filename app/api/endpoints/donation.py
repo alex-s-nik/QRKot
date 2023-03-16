@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -27,7 +29,7 @@ async def create_new_donation(
     donation: DonationCreate,
     session: AsyncSession = Depends(get_async_session)
 ) -> DonationDBForUser:
-    #  await check_duplicates
+    """Сделать пожертвование. Доступно любому пользователю."""
     new_donation = await donation_crud.create(donation, session)
     return new_donation
 
@@ -39,7 +41,8 @@ async def create_new_donation(
 )
 async def get_all_donations(
     session: AsyncSession = Depends(get_async_session)
-) -> list[DonationDBForSuperUser]:
+) -> Optional[list[DonationDBForSuperUser]]:
+    """Получить все пожертвования. Доступно только суперпользователю."""
     all_donations = await donation_crud.get_all(session)
     return all_donations
 
@@ -52,6 +55,7 @@ async def get_all_donations(
 async def get_my_donations(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_user)
-):
+) -> Optional[list[DonationDBForUser]]:
+    """Получить все пожартвования текущего пользователя."""
     my_donations = await donation_crud.get_my(session, user)
     return my_donations
