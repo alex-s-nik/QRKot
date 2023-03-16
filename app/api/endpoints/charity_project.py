@@ -38,7 +38,12 @@ async def create_new_project(
     project: CharityProjectCreate,
     session: AsyncSession = Depends(get_async_session)
 ) -> CharityProjectFromDB:
-    # await check_for_duplicates
+    project_id_from_db = await charity_project_crud.get_project_id_by_name(project.name)
+    if project_id_from_db:
+        raise HTTPException(
+            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+            detail='ПРоект с таким именем уже существует!'
+        )
     new_project = await charity_project_crud.create(project, session)
     return new_project
 
@@ -52,20 +57,18 @@ async def partially_update_project(
     project_from_req: CharityProjectUpdate,
     session: AsyncSession = Depends(get_async_session)
 ) -> CharityProjectFromDB:
-    #project = await get_project_by_id()
-    '''if not project:
+    project = await charity_project_crud.get_project_by_id(project_id, session)
+    if not project:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail='Проекта с таким именем нет!'
         )
-    if project_from_req.<unique_field>:
-        check_duplicate
-
+    
     project = await charity_project_crud.update(
         project, project_from_req, session
     )
 
-    return project'''
+    return project
 
 @router.delete(
     '/{project_id}',
@@ -75,12 +78,10 @@ async def remove_project(
     project_id: int,
     session: AsyncSession = Depends(get_async_session)
 ) -> CharityProjectFromDB:
-    project = ...
-    '''meeting_room = await check_meeting_room_exists(
-        meeting_room_id, session
+    project = charity_project_crud.get_project_by_id(
+        project_id, session
     )
-    meeting_room = await delete_meeting_room(
-        meeting_room, session
+    project = await charity_project_crud.delete(
+        project, session
     )
-    return meeting_room'''
     return project
