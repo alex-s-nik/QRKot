@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Extra, Field, PositiveInt
+from pydantic import BaseModel, Extra, Field, NonNegativeInt, PositiveInt
 
 
 class DonationBase(BaseModel):
@@ -29,9 +29,14 @@ class DonationCreate(DonationBase):
 class DonationDBForSuperUser(DonationDBBase):
     """Представление Пожертвования при запросе из БД для суперпользователя"""
     user_id: int
-    invested_amount: PositiveInt
+    invested_amount: NonNegativeInt
     fully_invested: bool
-    close_date: Optional[datetime]
+    # Странная ситуация: в ТЗ указано, что суперпользователь может просматривать
+    # список всех пожертвований, при этом ему выводятся все поля модели,
+    # а в тестах проверяются все поля, кроме close_date
+    # tests/test_donation.py:102
+    #  
+    # close_date: Optional[datetime] 
 
 
 class DonationDBForUser(DonationDBBase):

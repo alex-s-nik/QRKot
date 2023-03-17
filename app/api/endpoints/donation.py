@@ -22,7 +22,8 @@ router = APIRouter(
 
 @router.post(
     '/',
-    response_model=DonationCreate,
+    response_model=DonationDBForUser,
+    response_model_exclude_none=True,
     dependencies=[Depends(current_user)]
 )
 async def create_new_donation(

@@ -14,7 +14,7 @@ class CRUDDonation:
             new_donation: DonationCreate,
             session: AsyncSession,
             user: User
-    ) -> Donation:
+    ) -> DonationDBForUser:
         new_donation_data = new_donation.dict()
         new_donation_data['user_id'] = user.id
 
