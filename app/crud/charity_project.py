@@ -17,7 +17,7 @@ class CRUDCharityProject:
         self,
         new_project: CharityProjectCreate,
         session: AsyncSession
-    ) -> CharityProject:
+    ) -> CharityProjectFromDB:
         new_project_data = new_project.dict()
 
         db_project = CharityProject(**new_project_data)
@@ -29,8 +29,8 @@ class CRUDCharityProject:
         return db_project
 
     async def get_all(
-            self,
-            session: AsyncSession
+        self,
+        session: AsyncSession
     ) -> Optional[list[CharityProject]]:
         db_projects = await session.execute(
             select(CharityProject)
@@ -38,12 +38,13 @@ class CRUDCharityProject:
         return db_projects.scalars().all()
 
     async def update(
+        self,
         project_from_db: CharityProjectFromDB,
         project_from_req: CharityProjectUpdate,
         session: AsyncSession
     ) -> CharityProject:
         project_data = jsonable_encoder(project_from_db)
-        project_data_for_update = project_from_req.dict()
+        project_data_for_update = project_from_req.dict(exclude_unset=True)
 
         for field in project_data:
             if field in project_data_for_update:
@@ -55,6 +56,7 @@ class CRUDCharityProject:
         return project_from_db
     
     async def delete(
+        self,
         project_from_db: CharityProjectFromDB,
         session: AsyncSession,            
     ) -> CharityProject:
@@ -80,11 +82,11 @@ class CRUDCharityProject:
         project_id: int,
         session: AsyncSession
     ) -> Optional[CharityProject]:
-        project = session.execute(
+        project = await session.execute(
             select(CharityProject).where(
             CharityProject.id == project_id
             )
         )
-        return project
+        return project.scalars().first()
 
 charity_project_crud = CRUDCharityProject()

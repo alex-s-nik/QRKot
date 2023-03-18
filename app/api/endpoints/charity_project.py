@@ -10,6 +10,7 @@ from app.crud.charity_project import charity_project_crud
 from app.schemas.charity_project import (
     CharityProjectCreate,
     CharityProjectFromDB,
+    CharityProjectFromDBFull,
     CharityProjectUpdate
 )
 
@@ -33,7 +34,7 @@ async def get_all_projects(
 
 @router.post(
     '/',
-    response_model=CharityProjectCreate,
+    response_model=CharityProjectFromDB,
     dependencies=[Depends(current_superuser)]
 )
 async def create_new_project(
@@ -44,15 +45,15 @@ async def create_new_project(
     project_id_from_db = await charity_project_crud.get_project_id_by_name(project.name, session)
     if project_id_from_db:
         raise HTTPException(
-            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-            detail='ПРоект с таким именем уже существует!'
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail='Проект с таким именем уже существует!'
         )
     new_project = await charity_project_crud.create(project, session)
     return new_project
 
 @router.patch(
     '/{project_id}',
-    response_model=CharityProjectFromDB,
+    response_model=CharityProjectFromDBFull,
     dependencies=[Depends(current_superuser)]
 )
 async def partially_update_project(
@@ -62,21 +63,38 @@ async def partially_update_project(
 ) -> CharityProjectFromDB:
     """Обновить данные проекта с id project_id. Доступно супрепользователю."""
     project: CharityProject = await charity_project_crud.get_project_by_id(project_id, session)
+
+    # Обновляемого проекта нет в БД
     if not project:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail='Проекта с таким именем нет!'
+            detail='Такого проекта нет!'
         )
-    if project_from_req.full_amount < project.full_amount:
+    # Новое имя для проекта уже есть у другого проекта в БД
+    if project_from_req.name:
+        project_db_id = await charity_project_crud.get_project_id_by_name(
+            project_from_req.name, session
+        )
+        if project_db_id and project_db_id != project_id:
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail='Проект с таким именем уже существует!'
+            )
+    
+    # Нельзя изменить сумму необходимую для проекта на меньшую, чем уже внесено средств
+    if hasattr(project_from_req, 'full_amount') and project_from_req.full_amount and project_from_req.full_amount < project.invested_amount:
         raise HTTPException(
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-            detail="Нельзя сделать сумму пожертвования ниже, чем она была."
+            detail='Нельзя сделать сумму пожертвования ниже, чем уже внесено средств.'
         )
+    
+    # Закрытый проект нельзя редактировать
     if project.fully_invested:
         raise HTTPException(
-            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-            detail="Нельзя редактировать закрытый проект."
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail='Закрытый проект нельзя редактировать!'
         )
+
     project = await charity_project_crud.update(
         project, project_from_req, session
     )
@@ -85,20 +103,21 @@ async def partially_update_project(
 
 @router.delete(
     '/{project_id}',
-    response_model=CharityProjectFromDB
+    response_model=CharityProjectFromDBFull,
+    dependencies=[Depends(current_superuser)]
 )
 async def remove_project(
     project_id: int,
     session: AsyncSession = Depends(get_async_session)
-) -> CharityProjectFromDB:
+) -> CharityProjectFromDBFull:
     """Удалить проект. Доступно только суперпользователю."""
-    project: CharityProject = charity_project_crud.get_project_by_id(
+    project: CharityProject = await charity_project_crud.get_project_by_id(
         project_id, session
     )
-    if project.fully_invested:
+    if project.invested_amount > 0:
         raise HTTPException(
-            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-            detail="Нельзя удалить закрытый проект."
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail='В проект были внесены средства, не подлежит удалению!'
         )
     project = await charity_project_crud.delete(
         project, session

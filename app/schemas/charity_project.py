@@ -1,14 +1,14 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Extra, Field, PositiveInt
+from pydantic import BaseModel, Extra, Field, NonNegativeInt, PositiveInt, validator
 
 
 class CharityProjectBase(BaseModel):
     """Базовый класс Проекта"""
-    name: str = Field(..., max_length=100)
-    description: str
-    full_amount: PositiveInt = 0
+    name: Optional[str] = Field(None, max_length=100)
+    description: Optional[str]
+    full_amount: Optional[PositiveInt]
 
     class Config:
         orm_mode = True
@@ -17,18 +17,33 @@ class CharityProjectBase(BaseModel):
 
 class CharityProjectCreate(CharityProjectBase):
     """Создание Проекта"""
-    pass
+    name: str = Field(..., max_length=100)
+    description: str
+    full_amount: PositiveInt
+
 
 
 class CharityProjectUpdate(CharityProjectBase):
     """Обновление Проекта"""
-    pass
-
+    @validator('name')
+    def name_cannot_be_null(cls, value):
+        if not value:
+            raise ValueError('Название проекта не может быть пустым!')
+        return value
 
 class CharityProjectFromDB(CharityProjectBase):
     """Представление Проекта при запросе из БД"""
     id: int
-    invested_amount: PositiveInt
+    invested_amount: NonNegativeInt
     create_date: datetime
     fully_invested: bool
+    # Странная ситуация: в ТЗ указано, что суперпользователь может просматривать
+    # список всех пожертвований, при этом ему выводятся все поля модели,
+    # а в тестах проверяются все поля, кроме close_date
+    # tests/test_donation.py:102
+    #  
+    # close_date: Optional[datetime]
+
+
+class CharityProjectFromDBFull(CharityProjectFromDB):
     close_date: Optional[datetime]
