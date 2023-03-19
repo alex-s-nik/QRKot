@@ -23,7 +23,6 @@ router = APIRouter(
 @router.get(
     '/',
     response_model=list[CharityProjectFromDB],
-    dependencies=[Depends(current_user)],
     response_model_exclude_none=True,
 )
 async def get_all_projects(
