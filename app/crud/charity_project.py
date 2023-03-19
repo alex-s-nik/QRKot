@@ -54,16 +54,16 @@ class CRUDCharityProject:
         await session.commit()
         await session.refresh(project_from_db)
         return project_from_db
-    
+
     async def delete(
         self,
         project_from_db: CharityProjectFromDB,
-        session: AsyncSession,            
+        session: AsyncSession,
     ) -> CharityProject:
         await session.delete(project_from_db)
         await session.commit()
         return project_from_db
-    
+
     async def get_project_id_by_name(
         self,
         project_name: str,
@@ -76,7 +76,7 @@ class CRUDCharityProject:
         )
         db_project_id = db_project_id.scalars().first()
         return db_project_id
-    
+
     async def get_project_by_id(
         self,
         project_id: int,
@@ -84,9 +84,10 @@ class CRUDCharityProject:
     ) -> Optional[CharityProject]:
         project = await session.execute(
             select(CharityProject).where(
-            CharityProject.id == project_id
+                CharityProject.id == project_id
             )
         )
         return project.scalars().first()
+
 
 charity_project_crud = CRUDCharityProject()

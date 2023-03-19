@@ -1,6 +1,6 @@
-from typing import Optional, Union
+from typing import Union
 
-from fastapi import Depends, Request
+from fastapi import Depends
 from fastapi_users import (
     BaseUserManager, FastAPIUsers, IntegerIDMixin, InvalidPasswordException
 )
@@ -21,8 +21,10 @@ async def get_user_db(session: AsyncSession = Depends(get_async_session)):
 
 bearer_transport = BearerTransport(tokenUrl='auth/jwt/login')
 
+
 def get_jwt_strategy() -> JWTStrategy:
     return JWTStrategy(secret=settings.secret, lifetime_seconds=3600)
+
 
 auth_backend = AuthenticationBackend(
     name='jwt',
@@ -30,7 +32,8 @@ auth_backend = AuthenticationBackend(
     get_strategy=get_jwt_strategy
 )
 
-class UserManager(IntegerIDMixin, BaseUserManager[User,int]):
+
+class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     async def validate_password(
         self,
         password: str,
@@ -44,6 +47,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User,int]):
             raise InvalidPasswordException(
                 reason='Password should not contain e-mail'
             )
+
 
 async def get_user_manager(user_db=Depends(get_user_db)):
     yield UserManager(user_db)

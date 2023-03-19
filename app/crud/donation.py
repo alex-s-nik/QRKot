@@ -25,14 +25,14 @@ class CRUDDonation:
         await session.commit()
         await session.refresh(db_donation)
         return db_donation
-    
+
     async def get_all(
         self,
         session: AsyncSession
     ) -> Optional[list[DonationDBForSuperUser]]:
         db_donations = await session.execute(select(Donation))
         return db_donations.scalars().all()
-    
+
     async def get_my(
         self,
         session: AsyncSession,
@@ -44,5 +44,6 @@ class CRUDDonation:
             )
         )
         return db_my_donations.scalars().all()
+
 
 donation_crud = CRUDDonation()

@@ -15,12 +15,12 @@ class CharityProjectBase(BaseModel):
         extra = Extra.forbid
         min_anystr_length = 1
 
+
 class CharityProjectCreate(CharityProjectBase):
     """Создание Проекта"""
     name: str = Field(..., max_length=100)
     description: str
     full_amount: PositiveInt
-
 
 
 class CharityProjectUpdate(CharityProjectBase):
@@ -30,6 +30,7 @@ class CharityProjectUpdate(CharityProjectBase):
         if not value:
             raise ValueError('Название проекта не может быть пустым!')
         return value
+
 
 class CharityProjectFromDB(CharityProjectBase):
     """Представление Проекта при запросе из БД"""

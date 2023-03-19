@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import BaseModel
 
+
 def close(
         object: BaseModel
 ) -> BaseModel:
@@ -13,10 +14,11 @@ def close(
 
     return object
 
+
 async def invest(name_objects_from_db: BaseModel, obj_with_money: BaseModel, session: AsyncSession) -> BaseModel:
     all_objects_from_db = await session.execute(
         select(name_objects_from_db).where(
-            name_objects_from_db.fully_invested == False
+            name_objects_from_db.fully_invested is False
         ).order_by(name_objects_from_db.create_date)
     )
     all_objects_from_db = all_objects_from_db.scalars().all()
@@ -33,7 +35,7 @@ async def invest(name_objects_from_db: BaseModel, obj_with_money: BaseModel, ses
             obj_with_money = close(obj_with_money)
             session.add(obj)
             break
-        
+
         obj_with_money.invested_amount += obj_needed_amount
         obj.invested_amount = obj.full_amount
         obj = close(obj)

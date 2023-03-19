@@ -1,4 +1,3 @@
-from datetime import datetime
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -19,6 +18,7 @@ router = APIRouter(
     prefix='/charity_project',
     tags=['Charity Projects'],
 )
+
 
 @router.get(
     '/',
@@ -55,6 +55,7 @@ async def create_new_project(
     new_project = await invest(Donation, new_project, session)
     return new_project
 
+
 @router.patch(
     '/{project_id}',
     response_model=CharityProjectFromDB,
@@ -84,14 +85,14 @@ async def partially_update_project(
                 status_code=HTTPStatus.BAD_REQUEST,
                 detail='Проект с таким именем уже существует!'
             )
-    
+
     # Нельзя изменить сумму необходимую для проекта на меньшую, чем уже внесено средств
     if hasattr(project_from_req, 'full_amount') and project_from_req.full_amount and project_from_req.full_amount < project.invested_amount:
         raise HTTPException(
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
             detail='Нельзя сделать сумму пожертвования ниже, чем уже внесено средств.'
         )
-    
+
     # Закрытый проект нельзя редактировать
     if project.fully_invested:
         raise HTTPException(
@@ -106,6 +107,7 @@ async def partially_update_project(
         project = close(project)
 
     return project
+
 
 @router.delete(
     '/{project_id}',
