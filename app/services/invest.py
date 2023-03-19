@@ -18,7 +18,7 @@ def close(
 async def invest(name_objects_from_db: BaseModel, obj_with_money: BaseModel, session: AsyncSession) -> BaseModel:
     all_objects_from_db = await session.execute(
         select(name_objects_from_db).where(
-            name_objects_from_db.fully_invested is False
+            name_objects_from_db.fully_invested == False # noqa
         ).order_by(name_objects_from_db.create_date)
     )
     all_objects_from_db = all_objects_from_db.scalars().all()
