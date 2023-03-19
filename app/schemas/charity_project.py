@@ -37,13 +37,4 @@ class CharityProjectFromDB(CharityProjectBase):
     invested_amount: NonNegativeInt
     create_date: datetime
     fully_invested: bool
-    # Странная ситуация: в ТЗ указано, что суперпользователь может просматривать
-    # список всех пожертвований, при этом ему выводятся все поля модели,
-    # а в тестах проверяются все поля, кроме close_date
-    # tests/test_donation.py:102
-    #  
-    # close_date: Optional[datetime]
-
-
-class CharityProjectFromDBFull(CharityProjectFromDB):
     close_date: Optional[datetime]

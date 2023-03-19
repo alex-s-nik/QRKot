@@ -31,12 +31,7 @@ class DonationDBForSuperUser(DonationDBBase):
     user_id: int
     invested_amount: NonNegativeInt
     fully_invested: bool
-    # Странная ситуация: в ТЗ указано, что суперпользователь может просматривать
-    # список всех пожертвований, при этом ему выводятся все поля модели,
-    # а в тестах проверяются все поля, кроме close_date
-    # tests/test_donation.py:102
-    #  
-    # close_date: Optional[datetime] 
+    close_date: Optional[datetime] 
 
 
 class DonationDBForUser(DonationDBBase):

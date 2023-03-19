@@ -17,6 +17,10 @@ def test_donation_exist_non_project(superuser_client, donation):
 def test_project_exist_non_donations(superuser_client, charity_project):
     response = superuser_client.get('/charity_project/')
     data = response.json()
+    assert data == 1, (
+        'Если получено пожертвование, но открытых проектов нет, '
+        'вся сумма из пожертвования должна ожидать открытия нового проекта.'
+    )
     assert data[0]['invested_amount'] == 0, (
         'Если существует проект, но пожертвований пока нет, '
         'сумма invested_amount должна оставаться нулевой.'
